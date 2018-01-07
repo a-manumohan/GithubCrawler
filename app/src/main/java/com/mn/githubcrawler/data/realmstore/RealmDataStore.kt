@@ -2,17 +2,33 @@ package com.mn.githubcrawler.data.realmstore
 
 import com.mn.githubrepository.data.GithubRepo
 import com.mn.githubrepository.data.DataStore
+import io.realm.Realm
 
-class RealmDataStore: DataStore<GithubRepo>{
+class RealmDataStore(private val realm: Realm) : DataStore {
     override fun addItem(item: GithubRepo) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        realm.executeTransactionAsync {
+            val githubRepoRealmObject = realm.createObject(GithubRepoRealmObject::class.java)
+            githubRepoRealmObject.name = item.name
+            githubRepoRealmObject.fullName = item.fullName
+            githubRepoRealmObject.url = item.url
+            githubRepoRealmObject.language = item.language
+        }
     }
 
     override fun deleteItem(item: GithubRepo) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        realm.executeTransaction {
+            val results = realm.where(GithubRepoRealmObject::class.java)
+                    .equalTo("fullName", item.fullName)
+                    .and()
+                    .equalTo("url", item.url)
+                    .findAll()
+            results.deleteAllFromRealm()
+        }
     }
 
     override fun getItems(): List<GithubRepo> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return realm.where(GithubRepoRealmObject::class.java)
+                .findAll()
+                .map { item -> GithubRepoRealmObject.toGithubRepo(item) }
     }
 }

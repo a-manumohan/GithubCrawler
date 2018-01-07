@@ -1,9 +1,9 @@
 package com.mn.githubrepository.data
 
-interface DataStore<T> {
-    fun addItem(item : T)
+interface DataStore {
+    fun addItem(item : GithubRepo)
 
-    fun deleteItem(item: T)
+    fun deleteItem(item: GithubRepo)
 
-    fun getItems(): List<T>
+    fun getItems(): List<GithubRepo>
 }
