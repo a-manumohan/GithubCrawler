@@ -1,7 +1,8 @@
-package com.mn.githubcrawler
+package com.mn.githubcrawler.ui.repos
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import com.mn.githubcrawler.R
 
 class ReposActivity : AppCompatActivity() {
 

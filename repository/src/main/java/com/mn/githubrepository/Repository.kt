@@ -21,7 +21,7 @@ class Repository {
                 .build()
     }
 
-    fun getRepos(username: String, dataStore: DataStore<GithubRepo>): GetRepos {
+    fun getRepos(username: String, dataStore: DataStore): GetRepos {
         return GetRepos(githubApi, dataStore, username)
     }
 }
