@@ -20,7 +20,7 @@ class GithubCrawlerApplication : Application(), HasActivityInjector {
 
     private fun initDagger() {
         DaggerAppComponent.builder()
-                .appModule(AppModule(this))
+                .application(this)
                 .build()
                 .inject(this)
     }

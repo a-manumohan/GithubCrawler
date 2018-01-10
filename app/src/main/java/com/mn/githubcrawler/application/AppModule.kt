@@ -1,6 +1,5 @@
 package com.mn.githubcrawler.application
 
-import android.content.Context
 import com.mn.githubcrawler.data.realmstore.RealmDataStore
 import com.mn.githubrepository.Repository
 import com.mn.githubrepository.data.DataStore
@@ -10,7 +9,7 @@ import io.realm.Realm
 import javax.inject.Singleton
 
 @Module
-class AppModule(val context: Context) {
+class AppModule {
 
     @Provides
     @Singleton

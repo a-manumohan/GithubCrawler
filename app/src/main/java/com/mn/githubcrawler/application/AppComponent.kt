@@ -18,8 +18,6 @@ interface AppComponent : AndroidInjector<GithubCrawlerApplication> {
         @BindsInstance
         fun application(application: GithubCrawlerApplication) : Builder
 
-        fun appModule(appModule: AppModule) : Builder
-
         fun build(): AppComponent
     }
 }
