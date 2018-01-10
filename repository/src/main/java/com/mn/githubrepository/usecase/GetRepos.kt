@@ -3,18 +3,20 @@ package com.mn.githubrepository.usecase
 import com.mn.githubrepository.api.GithubApi
 import com.mn.githubrepository.data.DataStore
 import com.mn.githubrepository.data.GithubRepo
-
+import com.mn.githubrepository.thread.ThreadTransformer
 import io.reactivex.Flowable
 import org.reactivestreams.Publisher
 import org.reactivestreams.Subscriber
 
 class GetRepos(private val githubApi: GithubApi,
                private val dataStore: DataStore,
-               private val username: String) {
+               private val username: String,
+               private val threadTransformer: ThreadTransformer) {
 
     fun fetch(page: Int, perPage: Int): Flowable<List<GithubRepo>> {
         return githubApi.getRepos(username, page, perPage)
                 .startWith(readFromLocalStore(page))
+                .compose(threadTransformer.apply())
                 .doOnNext { repos: List<GithubRepo>? ->
                     persistToDataStore(repos)
                 }
