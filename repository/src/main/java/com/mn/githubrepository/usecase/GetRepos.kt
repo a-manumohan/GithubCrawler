@@ -13,8 +13,6 @@ class GetRepos(private val githubApi: GithubApi,
                private val username: String) {
 
     fun fetch(page: Int, perPage: Int): Flowable<List<GithubRepo>> {
-        //todo persist locally.
-        //todo if the call fails and if the page is 0, read from local store.
         return githubApi.getRepos(username, page, perPage)
                 .startWith(readFromLocalStore(page))
                 .doOnNext { repos: List<GithubRepo>? ->
