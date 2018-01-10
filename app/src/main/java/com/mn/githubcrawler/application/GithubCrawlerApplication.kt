@@ -5,6 +5,7 @@ import android.app.Application
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
+import io.realm.Realm
 import javax.inject.Inject
 
 class GithubCrawlerApplication : Application(), HasActivityInjector {
@@ -15,7 +16,12 @@ class GithubCrawlerApplication : Application(), HasActivityInjector {
     override fun onCreate() {
         super.onCreate()
 
+        initRealm()
         initDagger()
+    }
+
+    private fun initRealm() {
+        Realm.init(this)
     }
 
     private fun initDagger() {
