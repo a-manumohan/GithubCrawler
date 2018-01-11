@@ -1,13 +1,13 @@
 package com.mn.githubcrawler.ui.repos
 
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.mn.githubcrawler.R
 import com.mn.githubcrawler.ui.repos.model.ItemUiModel
 import com.mn.githubcrawler.ui.repos.model.LoadingUiModel
 import com.mn.githubcrawler.ui.repos.model.RepoUiModel
+import com.mn.githubcrawler.ui.repos.view.LoadingItemView
+import com.mn.githubcrawler.ui.repos.view.RepoItemView
 
 class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
     companion object {
@@ -32,15 +32,17 @@ class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
+        val layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+                RecyclerView.LayoutParams.WRAP_CONTENT)
         return when (viewType) {
             TYPE_REPO -> {
-                val view = LayoutInflater.from(parent?.context).inflate(R.layout.view_item_repo,
-                        parent, false)
+                val view = RepoItemView(parent?.context)
+                view.layoutParams = layoutParams
                 ViewHolder.RepoViewHolder(view)
             }
             TYPE_LOADING -> {
-                val view = LayoutInflater.from(parent?.context).inflate(R.layout.view_item_loading,
-                        parent, false)
+                val view = LoadingItemView(parent?.context)
+                view.layoutParams = layoutParams
                 ViewHolder.LoadingViewHolder(view)
             }
             else -> throw IllegalArgumentException("Invalid view type " + viewType)
@@ -72,15 +74,15 @@ class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
     }
 
     sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        class RepoViewHolder(itemView: View) : ViewHolder(itemView) {
+        class RepoViewHolder(itemView: RepoItemView) : ViewHolder(itemView) {
             fun bind(repoUiModel: RepoUiModel) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                (itemView as RepoItemView).bind(repoUiModel)
             }
         }
 
-        class LoadingViewHolder(itemView: View) : ViewHolder(itemView) {
+        class LoadingViewHolder(itemView: LoadingItemView) : ViewHolder(itemView) {
             fun bind(loadingUiModel: LoadingUiModel) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                (itemView as LoadingItemView).bind(loadingUiModel)
             }
         }
     }
