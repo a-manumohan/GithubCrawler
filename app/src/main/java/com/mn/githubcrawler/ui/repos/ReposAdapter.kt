@@ -13,9 +13,16 @@ class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
     companion object {
         const val TYPE_REPO = 0
         const val TYPE_LOADING = 1
+
+        interface OnLoadMoreListener {
+            fun loadMore()
+        }
     }
 
     private val items: MutableList<ItemUiModel> = mutableListOf()
+
+    var onLoadMoreListener: OnLoadMoreListener? = null
+    var loadMoreTriggered = false
 
     override fun getItemViewType(position: Int): Int {
         return when (items[position]) {
@@ -45,7 +52,7 @@ class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
             is ViewHolder.RepoViewHolder -> {
                 val repoUiModel: RepoUiModel = items[position] as RepoUiModel
                 holder.bind(repoUiModel)
-
+                triggerLoadMoreIfValid(position)
             }
             is ViewHolder.LoadingViewHolder -> {
                 val loadingUiModel: LoadingUiModel = items[position] as LoadingUiModel
@@ -55,6 +62,14 @@ class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
     }
 
     override fun getItemCount() = items.size
+
+    private fun triggerLoadMoreIfValid(position: Int) {
+        if (itemCount <= 3) return
+        if (position == itemCount - 4 && !loadMoreTriggered) {
+            onLoadMoreListener?.loadMore()
+            loadMoreTriggered = true
+        }
+    }
 
     sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         class RepoViewHolder(itemView: View) : ViewHolder(itemView) {
@@ -71,6 +86,7 @@ class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
     }
 
     fun bind(items: List<ItemUiModel>, append: Boolean) {
+        loadMoreTriggered = false
         if (append) {
             appendItems(items)
         } else {

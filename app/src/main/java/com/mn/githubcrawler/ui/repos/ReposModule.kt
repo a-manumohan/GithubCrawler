@@ -1,6 +1,8 @@
 package com.mn.githubcrawler.ui.repos
 
 import android.arch.lifecycle.ViewModelProviders
+import com.mn.githubcrawler.ui.provider.StringProvider
+import com.mn.githubcrawler.ui.provider.StringProviderImpl
 import com.mn.githubrepository.Repository
 import com.mn.githubrepository.data.DataStore
 import dagger.Module
@@ -15,7 +17,14 @@ class ReposModule {
     }
 
     @Provides
-    fun reposViewModelFactory(repository: Repository, dataStore: DataStore): ReposViewModelFactory {
-        return ReposViewModelFactory(repository, dataStore)
+    fun reposViewModelFactory(repository: Repository,
+                              dataStore: DataStore,
+                              stringProvider: StringProvider): ReposViewModelFactory {
+        return ReposViewModelFactory(repository, dataStore, stringProvider)
+    }
+
+    @Provides
+    fun stringProvider(activity: ReposActivity): StringProvider {
+        return StringProviderImpl(activity)
     }
 }
