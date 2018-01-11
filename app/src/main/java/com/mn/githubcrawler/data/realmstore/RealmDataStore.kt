@@ -17,7 +17,6 @@ class RealmDataStore : DataStore {
             }
             githubRepoRealmObject?.name = item.name
             githubRepoRealmObject?.fullName = item.fullName
-            githubRepoRealmObject?.language = item.language
         }
     }
 
