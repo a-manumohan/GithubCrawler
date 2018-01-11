@@ -19,11 +19,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideRealm(): Realm = Realm.getDefaultInstance()
-
-    @Provides
-    @Singleton
-    fun provideDataStore(realm: Realm): DataStore = RealmDataStore(realm)
+    fun provideDataStore(): DataStore = RealmDataStore()
 
     @Provides
     @Singleton

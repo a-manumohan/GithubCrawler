@@ -4,10 +4,11 @@ import com.mn.githubrepository.data.GithubRepo
 import com.mn.githubrepository.data.DataStore
 import io.realm.Realm
 
-class RealmDataStore(private val realm: Realm) : DataStore {
+class RealmDataStore : DataStore {
 
     override fun addItem(item: GithubRepo) {
-        realm.executeTransactionAsync {
+        val realm = Realm.getDefaultInstance()
+        realm.executeTransaction {
             var githubRepoRealmObject = realm.where(GithubRepoRealmObject::class.java)
                     .equalTo("url", item.url)
                     .findFirst()
@@ -16,12 +17,12 @@ class RealmDataStore(private val realm: Realm) : DataStore {
             }
             githubRepoRealmObject?.name = item.name
             githubRepoRealmObject?.fullName = item.fullName
-            githubRepoRealmObject?.url = item.url
             githubRepoRealmObject?.language = item.language
         }
     }
 
     override fun deleteItem(item: GithubRepo) {
+        val realm = Realm.getDefaultInstance()
         realm.executeTransaction {
             val results = realm.where(GithubRepoRealmObject::class.java)
                     .equalTo("url", item.url)
@@ -31,6 +32,7 @@ class RealmDataStore(private val realm: Realm) : DataStore {
     }
 
     override fun getItems(): List<GithubRepo> {
+        val realm = Realm.getDefaultInstance()
         return realm.where(GithubRepoRealmObject::class.java)
                 .findAll()
                 .map { item -> GithubRepoRealmObject.toGithubRepo(item) }
