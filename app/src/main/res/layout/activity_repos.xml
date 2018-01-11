@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context="com.mn.githubcrawler.ui.repos.ReposActivity">
 
-    <com.mn.githubcrawler.ui.repos.ReposView
+    <com.mn.githubcrawler.ui.repos.view.ReposView
         android:id="@+id/reposView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
