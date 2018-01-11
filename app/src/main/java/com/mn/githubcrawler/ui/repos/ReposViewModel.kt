@@ -11,6 +11,7 @@ import com.mn.githubrepository.Repository
 import com.mn.githubrepository.data.DataStore
 import com.mn.githubrepository.data.GithubRepo
 import io.reactivex.Flowable.fromIterable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 
 class ReposViewModel(private val repository: Repository,
@@ -24,6 +25,7 @@ class ReposViewModel(private val repository: Repository,
     private val reposMutableLiveData = MutableLiveData<ReposUiModel>()
     private val errorsMutableLiveData = MutableLiveData<String>()
     private val compositeDisposable = CompositeDisposable()
+    private val githubRepos = mutableListOf<GithubRepo>()
     private var currentPage = 0
     private var loadMore = true
 
@@ -36,14 +38,21 @@ class ReposViewModel(private val repository: Repository,
     fun errorsLiveData(): LiveData<String> = errorsMutableLiveData
 
     fun onLoad() {
-        fetchFirstPage()
+        if (githubRepos.isEmpty()) {
+            fetchFirstPage()
+        } else {
+            showFirstPage(githubRepos)
+        }
     }
 
     private fun fetchFirstPage() {
         compositeDisposable.add(repository.getRepos(USERNAME, dataStore)
                 .fetch(0, PER_PAGE)
-                .subscribe({ githubRepos -> showFirstPage(githubRepos) },
-                        { handleLoadError() }))
+                .subscribe({ githubRepos ->
+                    this.githubRepos.addAll(githubRepos)
+                    showFirstPage(githubRepos)
+                },
+                        { t -> handleLoadError(t) }))
     }
 
     private fun fetchPage(page: Int, perPage: Int) {
@@ -51,13 +60,14 @@ class ReposViewModel(private val repository: Repository,
                 .fetch(page, perPage)
                 .subscribe({ githubRepos ->
                     updateLoadMore(githubRepos.size)
+                    this.githubRepos.addAll(githubRepos)
                     updatePage(githubRepos)
-                }, {
-                    handleLoadError()
+                }, { t ->
+                    handleLoadError(t)
                 }))
     }
 
-    private fun handleLoadError() {
+    private fun handleLoadError(t: Throwable) {
         loadMore = false
         errorsMutableLiveData.value = stringProvider.getString(R.string.error_message)
     }
@@ -70,9 +80,7 @@ class ReposViewModel(private val repository: Repository,
     }
 
     private fun showFirstPage(githubRepos: List<GithubRepo>) {
-        compositeDisposable.add(fromIterable(githubRepos)
-                .map { githubRepo -> RepoUiModel(githubRepo.name, githubRepo.url) }
-                .toList()
+        compositeDisposable.add(mapToRepoUiModel(githubRepos)
                 .map { repoUiModels ->
                     ReposUiModel(repoUiModels, false, {
                         loadNextPage()
@@ -82,10 +90,8 @@ class ReposViewModel(private val repository: Repository,
         )
     }
 
-    private fun updatePage(githubRepos: List<GithubRepo>?) {
-        compositeDisposable.add(fromIterable(githubRepos)
-                .map { githubRepo -> RepoUiModel(githubRepo.name, githubRepo.url) }
-                .toList()
+    private fun updatePage(githubRepos: List<GithubRepo>) {
+        compositeDisposable.add(mapToRepoUiModel(githubRepos)
                 .map { repoUiModels ->
                     ReposUiModel(repoUiModels, true, {
                         loadNextPage()
@@ -93,6 +99,12 @@ class ReposViewModel(private val repository: Repository,
                 }
                 .subscribe { reposUiModel -> reposMutableLiveData.value = reposUiModel }
         )
+    }
+
+    private fun mapToRepoUiModel(githubRepos: List<GithubRepo>): Single<List<RepoUiModel>> {
+        return fromIterable(githubRepos)
+                .map { githubRepo -> RepoUiModel(githubRepo.name, githubRepo.url) }
+                .toList()
     }
 
     private fun updateLoadMore(size: Int) {
