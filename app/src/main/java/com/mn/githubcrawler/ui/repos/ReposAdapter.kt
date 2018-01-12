@@ -1,5 +1,6 @@
 package com.mn.githubcrawler.ui.repos
 
+import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
@@ -20,9 +21,10 @@ class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
     }
 
     private val items: MutableList<ItemUiModel> = mutableListOf()
+    private var loadMoreTriggered = false
+    private val handler = Handler()
 
     var onLoadMoreListener: OnLoadMoreListener? = null
-    var loadMoreTriggered = false
 
     override fun getItemViewType(position: Int): Int {
         return when (items[position]) {
@@ -99,13 +101,26 @@ class ReposAdapter : RecyclerView.Adapter<ReposAdapter.ViewHolder>() {
     private fun replaceItems(items: List<ItemUiModel>) {
         this.items.clear()
         this.items.addAll(items)
-        notifyDataSetChanged()
+        handler.post { notifyDataSetChanged() }
     }
 
     private fun appendItems(items: List<ItemUiModel>) {
         val startIndex = this.items.size
         this.items.addAll(items)
-        notifyItemRangeInserted(startIndex, items.size)
+        handler.post { notifyItemRangeInserted(startIndex, items.size) }
+    }
+
+    fun showLoading(loadingUiModel: LoadingUiModel) {
+        if (loadingUiModel.loading) {
+            this.items.add(loadingUiModel) //add loading item
+            handler.post { notifyItemInserted(this.items.size - 1) }
+        } else if (!items.isEmpty()) {
+            val index: Int? = (0 until items.size).firstOrNull { items[it] is LoadingUiModel }
+            index?.let {
+                this.items.removeAt(index) //remove loading item
+                handler.post { notifyItemRemoved(index) }
+            }
+        }
     }
 }
 
