@@ -16,6 +16,7 @@ class GetRepos(private val githubApi: GithubApi,
 
     fun fetch(page: Int, perPage: Int): Flowable<List<GithubRepo>> {
         val localFlowable = Flowable.just(dataStore.getItems())
+                .filter { items -> !items.isEmpty() }
                 .compose(threadTransformer.apply())
 
         val remoteFlowable = githubApi.getRepos(username, page, perPage)
