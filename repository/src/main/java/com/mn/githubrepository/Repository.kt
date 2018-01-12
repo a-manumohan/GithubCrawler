@@ -9,19 +9,31 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-class Repository(private val threadTransformer: ThreadTransformer) {
-    private val retrofit: Retrofit = initRetrofit()
-    private var githubApi: GithubApi = retrofit.create(GithubApi::class.java)
+abstract class Repository {
+    abstract fun getRepos(username: String, dataStore: DataStore): GetRepos
 
-    private fun initRetrofit(): Retrofit {
-        return Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-    }
+    companion object {
+        fun getRepository(threadTransformer: ThreadTransformer): Repository {
+            return RepositoryImpl(threadTransformer)
+        }
 
-    fun getRepos(username: String, dataStore: DataStore): GetRepos {
-        return GetRepos(githubApi, dataStore, username, threadTransformer)
+        private class RepositoryImpl(private val threadTransformer: ThreadTransformer)
+            : Repository() {
+            private val retrofit: Retrofit = initRetrofit()
+            private var githubApi: GithubApi = retrofit.create(GithubApi::class.java)
+
+            private fun initRetrofit(): Retrofit {
+                return Retrofit.Builder()
+                        .baseUrl(Constants.BASE_URL)
+                        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build()
+            }
+
+            override fun getRepos(username: String, dataStore: DataStore): GetRepos {
+                return GetRepos(githubApi, dataStore, username, threadTransformer)
+            }
+        }
+
     }
 }
