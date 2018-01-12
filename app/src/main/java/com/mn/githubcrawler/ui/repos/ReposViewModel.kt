@@ -5,12 +5,14 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.mn.githubcrawler.R
 import com.mn.githubcrawler.ui.provider.StringProvider
+import com.mn.githubcrawler.ui.repos.model.LoadingUiModel
 import com.mn.githubcrawler.ui.repos.model.RepoUiModel
 import com.mn.githubcrawler.ui.repos.model.ReposUiModel
 import com.mn.githubrepository.Repository
 import com.mn.githubrepository.data.DataStore
 import com.mn.githubrepository.data.GithubRepo
 import io.reactivex.Flowable.fromIterable
+import io.reactivex.FlowableTransformer
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 
@@ -24,6 +26,7 @@ class ReposViewModel(private val repository: Repository,
 
     private val reposMutableLiveData = MutableLiveData<ReposUiModel>()
     private val errorsMutableLiveData = MutableLiveData<String>()
+    private val loadingMutableLiveData = MutableLiveData<LoadingUiModel>()
     private val compositeDisposable = CompositeDisposable()
     private val githubRepos = mutableListOf<GithubRepo>()
     private var currentPage = 1 //page starts from 1
@@ -36,6 +39,7 @@ class ReposViewModel(private val repository: Repository,
 
     fun reposLiveData(): LiveData<ReposUiModel> = reposMutableLiveData
     fun errorsLiveData(): LiveData<String> = errorsMutableLiveData
+    fun loadingLiveData(): LiveData<LoadingUiModel> = loadingMutableLiveData
 
     fun onLoad() {
         if (githubRepos.isEmpty()) {
@@ -48,6 +52,7 @@ class ReposViewModel(private val repository: Repository,
     private fun fetchFirstPage() {
         compositeDisposable.add(repository.getRepos(USERNAME, dataStore)
                 .fetch(1, PER_PAGE)
+                .compose(applyLoading())
                 .subscribe({ githubRepos ->
                     this.githubRepos.addAll(githubRepos)
                     showFirstPage(githubRepos)
@@ -58,6 +63,7 @@ class ReposViewModel(private val repository: Repository,
     private fun fetchPage(page: Int, perPage: Int) {
         compositeDisposable.add(repository.getRepos(USERNAME, dataStore)
                 .fetch(page, perPage)
+                .compose(applyLoading())
                 .subscribe({ githubRepos ->
                     updateLoadMore(githubRepos.size)
                     this.githubRepos.addAll(githubRepos)
@@ -99,6 +105,18 @@ class ReposViewModel(private val repository: Repository,
                 }
                 .subscribe { reposUiModel -> reposMutableLiveData.value = reposUiModel }
         )
+    }
+
+    private fun <T> applyLoading(): FlowableTransformer<T, T> {
+        return FlowableTransformer { o ->
+            o.doOnSubscribe { showLoading(true) }
+                    .doOnComplete { showLoading(false) }
+                    .doOnError { showLoading(false) }
+        }
+    }
+
+    private fun showLoading(show: Boolean) {
+        loadingMutableLiveData.value = LoadingUiModel(show)
     }
 
     private fun mapToRepoUiModel(githubRepos: List<GithubRepo>): Single<List<RepoUiModel>> {
