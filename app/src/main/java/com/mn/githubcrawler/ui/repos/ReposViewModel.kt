@@ -26,7 +26,7 @@ class ReposViewModel(private val repository: Repository,
     private val errorsMutableLiveData = MutableLiveData<String>()
     private val compositeDisposable = CompositeDisposable()
     private val githubRepos = mutableListOf<GithubRepo>()
-    private var currentPage = 0
+    private var currentPage = 1 //page starts from 1
     private var loadMore = true
 
     override fun onCleared() {
@@ -47,7 +47,7 @@ class ReposViewModel(private val repository: Repository,
 
     private fun fetchFirstPage() {
         compositeDisposable.add(repository.getRepos(USERNAME, dataStore)
-                .fetch(0, PER_PAGE)
+                .fetch(1, PER_PAGE)
                 .subscribe({ githubRepos ->
                     this.githubRepos.addAll(githubRepos)
                     showFirstPage(githubRepos)
