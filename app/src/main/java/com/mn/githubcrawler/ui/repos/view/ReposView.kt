@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.FrameLayout
 import com.mn.githubcrawler.R
 import com.mn.githubcrawler.ui.repos.ReposAdapter
+import com.mn.githubcrawler.ui.repos.model.LoadingUiModel
 import com.mn.githubcrawler.ui.repos.model.ReposUiModel
 import kotlinx.android.synthetic.main.view_repos.view.*
 
@@ -29,6 +30,12 @@ class ReposView @JvmOverloads constructor(
                     reposUiModel.loadMore()
                 }
             }
+        }
+    }
+
+    fun showLoading(loadingUiModel: LoadingUiModel?) {
+        loadingUiModel?.let {
+            reposAdapter.showLoading(loadingUiModel)
         }
     }
 }
