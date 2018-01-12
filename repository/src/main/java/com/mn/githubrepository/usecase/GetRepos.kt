@@ -23,7 +23,7 @@ class GetRepos(private val githubApi: GithubApi,
                 .doOnNext { repos: List<GithubRepo>? ->
                     persistToDataStore(repos)
                 }
-        return if (page == 0) {
+        return if (page == 1) {
             Flowable.concat(localFlowable, remoteFlowable)
         } else {
             remoteFlowable
